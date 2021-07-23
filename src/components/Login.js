@@ -3,13 +3,14 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import Link from '@material-ui/core/Link';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Alert from "@material-ui/lab/Alert";
+import Redirect from "react-router-dom/Redirect";
+import { NavLink } from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -36,6 +37,8 @@ export default function SignIn() {
   const [userName, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const [disabled, setDisabled] = useState(false);
+  const [userId, setUserId] = useState(false);
+  const [goToUserContactInfo, setGoToUserContactInfo] = useState(false);
   const [alertDetails, setAlertDetails] = useState({ hidden: true });
 
   function LogIn() {
@@ -46,7 +49,7 @@ export default function SignIn() {
         message: "Log in...",
       });
     setTimeout(() => {
-        fetch(`/user/login_user?user_name=${userName}&password=${password}`)
+        fetch(`/user/login_user?user_name=${userName}&password=${ window.btoa(password)}`)
         .then((res) => res.json())
         .then(
             (result) => {
@@ -56,7 +59,8 @@ export default function SignIn() {
                         severity: "success",
                         message: "Log in success",
                       });
-                    
+                      setUserId(result.id);
+                      setGoToUserContactInfo(true);
                 } else {
                     setAlertDetails({
                         hidden: false,
@@ -112,6 +116,7 @@ export default function SignIn() {
             onChange={(e) => {setPassword(e.target.value)}}
             disabled={disabled}
           />
+          
           <Button
             type="submit"
             fullWidth
@@ -124,15 +129,19 @@ export default function SignIn() {
           </Button>
           <Grid container>
             <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
-              </Link>
+            <NavLink
+            className="App-link"
+            to="/SignUp"
+            exact
+            activeClassName="Link-active-style"
+          >{"Don't have an account? Sign Up"}</NavLink>
             </Grid>
           </Grid>
       </div>
       {!alertDetails.hidden && (
           <Alert severity={alertDetails.severity}>{alertDetails.message}</Alert>
         )}
+        {goToUserContactInfo && <Redirect to={`UserContactInfo/${userId}`} />}
     </Container>
   );
 }
